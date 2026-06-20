@@ -3405,5 +3405,91 @@ Serie
 
 </div>
 
+ <script>
+(async function () {
+
+    async function detectarBrave() {
+        try {
+            return navigator.brave &&
+                   await navigator.brave.isBrave();
+        } catch {
+            return false;
+        }
+    }
+
+    function detectarAdBlock() {
+        return new Promise(resolve => {
+
+            const bait = document.createElement("div");
+
+            bait.className =
+                "ads ad adsbox ad-banner ad-unit doubleclick";
+
+            bait.style.cssText = `
+                position:absolute;
+                left:-9999px;
+                width:1px;
+                height:1px;
+            `;
+
+            document.body.appendChild(bait);
+
+            setTimeout(() => {
+
+                const bloqueado =
+                    bait.offsetHeight === 0 ||
+                    bait.offsetWidth === 0 ||
+                    getComputedStyle(bait).display === "none" ||
+                    getComputedStyle(bait).visibility === "hidden";
+
+                bait.remove();
+                resolve(bloqueado);
+
+            }, 150);
+        });
+    }
+
+    const esBrave = await detectarBrave();
+    const tieneAdBlock = await detectarAdBlock();
+
+    if (esBrave || tieneAdBlock) {
+
+        document.body.innerHTML = `
+        <div style="
+            position:fixed;
+            inset:0;
+            background:#000;
+            color:#fff;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            text-align:center;
+            font-family:Arial,sans-serif;
+            z-index:999999;
+            padding:20px;
+        ">
+            <div>
+                <h1>Acceso bloqueado</h1>
+                <p>Desactiva Brave Shields o tu bloqueador de anuncios para continuar.</p>
+                <button onclick="location.reload()"
+                    style="
+                        padding:12px 25px;
+                        border:none;
+                        border-radius:8px;
+                        background:#e50914;
+                        color:#fff;
+                        cursor:pointer;
+                        margin-top:15px;
+                    ">
+                    Reintentar
+                </button>
+            </div>
+        </div>
+        `;
+    }
+
+})();
+ </script>
+
 </body>
   </html>
